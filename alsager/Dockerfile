@@ -6,7 +6,7 @@
 # The {arch} placeholder is substituted by the Supervisor at build time when
 # building locally; in CI we pin an explicit arch base per matrix job.
 
-ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:dev
+ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:3.18
 FROM ${BUILD_FROM}
 
 # Disable Python buffering and set UTF-8
