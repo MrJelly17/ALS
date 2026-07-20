@@ -14,20 +14,12 @@ config/
 hermes-verify*.py
 
 # --- Local-only project documentation / worklog (NOT pushed to GitHub) ---
-ZADANIE.md
-WYMAGANIA.md
-BADANIA.md
-IDEE.md
-STRUKTURA.md
-ROADMAP.md
-SECURITY.md
-STACK.md
 TASK.md
-INSTRUCTIONS.md
-IDEAS.md
-MOCKUPS.md
 REQUIREMENTS.md
 RESEARCH.md
+IDEAS.md
+STRUCTURE.md
+ROADMAP.md
 WORKLOG.md
 CHANGELOG.md
 ADDON_PLAN.md
