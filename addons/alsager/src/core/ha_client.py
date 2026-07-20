@@ -128,6 +128,9 @@ class HAClient:
 
     def get_entity_state(self, entity_id: str) -> dict | None:
         """GET /api/states/<entity_id>."""
+        import re
+        if not re.match(r"^[a-zA-Z0-9_]+\.[a-zA-Z0-9_.-]+$", entity_id):
+            raise ValueError(f"Invalid entity_id: {entity_id}")
         url = f"{self.base_url}/states/{entity_id}"
         resp = httpx.get(
             url,

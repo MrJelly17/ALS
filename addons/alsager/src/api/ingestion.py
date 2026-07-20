@@ -32,3 +32,8 @@ async def stop_ingestion() -> dict:
 @router.get("/ingestion/status")
 async def ingestion_status() -> dict:
     return ingestion_daemon.daemon.snapshot()
+
+
+@router.get("/ingestion/recent")
+async def get_recent_ingestion(limit: int = 50) -> list[dict]:
+    return ingestion_daemon.daemon.db.recent(limit=limit)

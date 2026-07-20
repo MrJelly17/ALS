@@ -25,6 +25,13 @@ class IngestionDaemon:
     def __init__(self, db: IngestionDB, store: MonitoredStore, interval: float = 2.0) -> None:
         self.db = db
         self.store = store
+        import os
+        env_interval = os.environ.get("ALSAGER_POLL_INTERVAL")
+        if env_interval is not None:
+            try:
+                interval = float(env_interval)
+            except ValueError:
+                pass
         self.interval = interval
         self._task: Optional[asyncio.Task] = None
         self._running = False
@@ -78,7 +85,18 @@ class IngestionDaemon:
         if self._running:
             return False
         self._running = True
-        self._task = asyncio.ensure_future(self._run())
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            import warnings
+            try:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", DeprecationWarning)
+                    loop = asyncio.get_event_loop_policy().get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+        self._task = loop.create_task(self._run())
         return True
 
     def stop(self) -> bool:

@@ -1,6 +1,18 @@
 // Alsager web UI logic (MVA-3: status + ingestion controls + data preview).
 const $ = (sel) => document.querySelector(sel);
 
+function escapeHtml(str) {
+  if (typeof str !== "string") {
+    str = String(str ?? "");
+  }
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 async function loadStatus() {
   try {
     const res = await fetch("/api/status");
@@ -38,15 +50,29 @@ async function stopIngestion() {
 }
 
 async function loadData() {
-  const res = await fetch("/api/ingestion/status");
-  const snap = await res.json();
-  // recent rows come from a dedicated endpoint in later modules; for MVA-3
-  // we surface total/snapshot. (Data table fill deferred to MVA-3 data API.)
-  const tbody = $("#data-rows");
-  tbody.innerHTML =
-    `<tr><td colspan="5" class="muted">Ingestion running: ${snap.running} · ` +
-    `total rows: ${snap.rows_total} · today: ${snap.rows_today}. ` +
-    `Per-row preview lands with the data API.</td></tr>`;
+  try {
+    const res = await fetch("/api/ingestion/recent?limit=50");
+    const rows = await res.json();
+    const tbody = $("#data-rows");
+    tbody.innerHTML = "";
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="muted" style="text-align: center;">No ingestion data available yet. Start ingestion and make sure you are monitoring entities.</td></tr>`;
+      return;
+    }
+    for (const r of rows) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(r.id)}</td>
+        <td><strong class="ent-id">${escapeHtml(r.entity_id)}</strong></td>
+        <td>${escapeHtml(r.state)}</td>
+        <td>${escapeHtml(r.domain)}</td>
+        <td><small class="muted">${escapeHtml(r.received_at)}</small></td>`;
+      tbody.appendChild(tr);
+    }
+  } catch (err) {
+    const tbody = $("#data-rows");
+    tbody.innerHTML = `<tr><td colspan="5" class="muted" style="text-align: center;">Error loading preview: ${escapeHtml(err.message)}</td></tr>`;
+  }
 }
 
 async function loadEntities() {
@@ -67,12 +93,13 @@ async function loadEntities() {
     }
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><input type="checkbox" class="ent-check" value="${e.entity_id}" /></td>
-      <td><span class="ent-id">${e.entity_id}</span><br><small class="muted">${e.friendly_name}</small></td>
-      <td>${e.domain}</td>
-      <td>${e.state}</td>`;
+      <td><input type="checkbox" class="ent-check" value="${escapeHtml(e.entity_id)}" /></td>
+      <td><span class="ent-id">${escapeHtml(e.entity_id)}</span><br><small class="muted">${escapeHtml(e.friendly_name)}</small></td>
+      <td>${escapeHtml(e.domain)}</td>
+      <td>${escapeHtml(e.state)}</td>`;
     rows.appendChild(tr);
   }
+  await loadMonitored();
 }
 
 async function loadMonitored() {
@@ -121,6 +148,15 @@ function wireTabs() {
       document.querySelectorAll(".tab-panel").forEach((p) => p.classList.add("hidden"));
       tab.classList.add("active");
       document.querySelector(`.tab-panel[data-panel="${tab.dataset.tab}"]`).classList.remove("hidden");
+
+      const tabName = tab.dataset.tab;
+      if (tabName === "status") {
+        loadStatus();
+      } else if (tabName === "entities") {
+        loadEntities();
+      } else if (tabName === "data") {
+        loadData();
+      }
     });
   });
 }

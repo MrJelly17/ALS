@@ -13,13 +13,22 @@ from typing import List
 from src.core.config import CONFIG_DIR
 
 
+import re
+import threading
+
+def is_valid_entity_id(entity_id: str) -> bool:
+    """Validate a Home Assistant entity ID format to prevent URL/path manipulation."""
+    return bool(re.match(r"^[a-zA-Z0-9_]+\.[a-zA-Z0-9_.-]+$", entity_id))
+
 class MonitoredStore:
-    """Persists the monitored entity set to ``monitored.json`` (no dupes)."""
+    """Persists the monitored entity set to ``monitored.json`` (no dupes) with thread safety."""
 
     def __init__(self, path: Path | None = None) -> None:
         self.path = path or (CONFIG_DIR / "monitored.json")
+        self._lock = threading.Lock()
         self._entities: List[str] = []
-        self._load()
+        with self._lock:
+            self._load()
 
     def _load(self) -> None:
         if self.path.exists():
@@ -36,27 +45,31 @@ class MonitoredStore:
         self.path.write_text(json.dumps(sorted(self._entities), indent=2))
 
     def list(self) -> List[str]:
-        return list(self._entities)
+        with self._lock:
+            return list(self._entities)
 
     def add(self, entity_ids: List[str]) -> None:
-        added = False
-        for eid in entity_ids:
-            if eid and eid not in self._entities:
-                self._entities.append(eid)
-                added = True
-        if added:
-            self._save()
+        with self._lock:
+            added = False
+            for eid in entity_ids:
+                if eid and is_valid_entity_id(eid) and eid not in self._entities:
+                    self._entities.append(eid)
+                    added = True
+            if added:
+                self._save()
 
     def remove(self, entity_ids: List[str]) -> None:
-        before = set(self._entities)
-        self._entities = [e for e in self._entities if e not in set(entity_ids)]
-        if set(self._entities) != before:
-            self._save()
+        with self._lock:
+            before = set(self._entities)
+            self._entities = [e for e in self._entities if e not in set(entity_ids)]
+            if set(self._entities) != before:
+                self._save()
 
     def clear(self) -> None:
-        if self._entities:
-            self._entities = []
-            self._save()
+        with self._lock:
+            if self._entities:
+                self._entities = []
+                self._save()
 
 
 # Module-level singleton shared by the entities API and the ingestion daemon

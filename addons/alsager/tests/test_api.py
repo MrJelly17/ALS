@@ -88,6 +88,20 @@ def test_monitored_requires_ids(client):
     assert res.status_code == 400
 
 
+def test_monitored_invalid_ids_rejected(client):
+    # Testing that invalid and potentially dangerous entity IDs are correctly rejected
+    res = client.post("/api/monitored", json={"entity_ids": ["../../../malicious_id"]})
+    assert res.status_code == 400
+    assert "Invalid entity_id format" in res.json()["detail"]
+
+
+def test_ingestion_recent_endpoint(client):
+    # Testing that the new recent ingestion endpoint works and returns a list
+    res = client.get("/api/ingestion/recent?limit=10")
+    assert res.status_code == 200
+    assert isinstance(res.json(), list)
+
+
 def test_index_served(client):
     res = client.get("/")
     assert res.status_code == 200
