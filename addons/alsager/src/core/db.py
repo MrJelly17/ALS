@@ -32,18 +32,22 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+import threading
+
 class IngestionDB:
-    """Thin SQLite wrapper for the ingestion log."""
+    """Thin SQLite wrapper for the ingestion log with thread safety."""
 
     def __init__(self, path: Path | None = None) -> None:
         from src.core.config import DATA_DIR
 
         self.path = path or (DATA_DIR / "ingestion.db")
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.conn = sqlite3.connect(str(self.path), check_same_thread=False)
-        self.conn.row_factory = sqlite3.Row
-        self.conn.executescript(SCHEMA)
-        self.conn.commit()
+        self._lock = threading.Lock()
+        with self._lock:
+            self.conn = sqlite3.connect(str(self.path), check_same_thread=False)
+            self.conn.row_factory = sqlite3.Row
+            self.conn.executescript(SCHEMA)
+            self.conn.commit()
 
     def insert(
         self,
@@ -53,29 +57,34 @@ class IngestionDB:
         domain: Optional[str],
         last_updated: Optional[str],
     ) -> None:
-        self.conn.execute(
-            """INSERT INTO ingestion_log
-               (entity_id, state, attributes_json, domain, last_updated, received_at)
-               VALUES (?, ?, ?, ?, ?, ?)""",
-            (entity_id, state, attributes_json, domain, last_updated, _now_iso()),
-        )
-        self.conn.commit()
+        with self._lock:
+            self.conn.execute(
+                """INSERT INTO ingestion_log
+                   (entity_id, state, attributes_json, domain, last_updated, received_at)
+                   VALUES (?, ?, ?, ?, ?, ?)""",
+                (entity_id, state, attributes_json, domain, last_updated, _now_iso()),
+            )
+            self.conn.commit()
 
     def count_total(self) -> int:
-        row = self.conn.execute("SELECT COUNT(*) AS c FROM ingestion_log").fetchone()
-        return int(row["c"])
+        with self._lock:
+            row = self.conn.execute("SELECT COUNT(*) AS c FROM ingestion_log").fetchone()
+            return int(row["c"])
 
     def count_today(self) -> int:
-        row = self.conn.execute(
-            "SELECT COUNT(*) AS c FROM ingestion_log WHERE DATE(received_at) = DATE('now')"
-        ).fetchone()
-        return int(row["c"])
+        with self._lock:
+            row = self.conn.execute(
+                "SELECT COUNT(*) AS c FROM ingestion_log WHERE DATE(received_at) = DATE('now')"
+            ).fetchone()
+            return int(row["c"])
 
     def recent(self, limit: int = 50) -> list[dict]:
-        rows = self.conn.execute(
-            "SELECT * FROM ingestion_log ORDER BY id DESC LIMIT ?", (limit,)
-        ).fetchall()
-        return [dict(r) for r in rows]
+        with self._lock:
+            rows = self.conn.execute(
+                "SELECT * FROM ingestion_log ORDER BY id DESC LIMIT ?", (limit,)
+            ).fetchall()
+            return [dict(r) for r in rows]
 
     def close(self) -> None:
-        self.conn.close()
+        with self._lock:
+            self.conn.close()
