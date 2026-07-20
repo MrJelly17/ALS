@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "addons/alsager/**"
+      - "alsager/**"
       - ".github/workflows/build.yml"
   workflow_dispatch:
   release:
@@ -59,8 +59,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./addons/alsager
-          file: ./addons/alsager/Dockerfile
+          context: ./alsager
+          file: ./alsager/Dockerfile
           platforms: ${{ matrix.platform }}
           push: true
           tags: |
