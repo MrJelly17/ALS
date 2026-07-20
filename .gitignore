@@ -1,4 +1,6 @@
 # Alsager repo root .gitignore
+# NOTE: project docs/worklog are intentionally KEPT OUT of the GitHub repo
+# (user wants no public visibility of work-in-progress). They live only locally.
 .DS_Store
 __pycache__/
 *.py[cod]
@@ -10,3 +12,28 @@ env/
 data/
 config/
 hermes-verify*.py
+
+# --- Local-only project documentation / worklog (NOT pushed to GitHub) ---
+ZADANIE.md
+WYMAGANIA.md
+BADANIA.md
+IDEE.md
+STRUKTURA.md
+ROADMAP.md
+SECURITY.md
+STACK.md
+TASK.md
+INSTRUCTIONS.md
+IDEAS.md
+MOCKUPS.md
+REQUIREMENTS.md
+RESEARCH.md
+WORKLOG.md
+CHANGELOG.md
+ADDON_PLAN.md
+README.md
+ADDON_INSTALL.md
+OPEN_QUESTIONS.md
+repository.yaml
+PACKAGE_NOTES.md
+*.local.md
