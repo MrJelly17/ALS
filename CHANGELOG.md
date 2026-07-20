@@ -4,14 +4,6 @@ All notable changes to this project will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Versioning based on [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
-
-- Build pipeline: GitHub Actions workflow (`.github/workflows/build.yml`)
-  builds the add-on image per-arch (amd64/armv7/arm64) via Buildx + QEMU and
-  pushes to **GHCR** (`ghcr.io/<owner>/alsager-<arch>:dev` on push to `main`,
-  `:<version>` on release). HA no longer builds locally — it pulls the
-  prebuilt image referenced in `config.json` `image` field.
-
 ## [0.3.0] - 2026-07-20
 
 ### Added (MVA-3: Ingestion)
@@ -28,7 +20,13 @@ Versioning based on [Semantic Versioning](https://semver.org/).
 - Web UI: Status tab "Start/Stop ingestion" + counters (rows total/today,
   last error); Data preview tab.
 - `config.json` v0.3.0 with `options`/`schema` (`ha_base_url`, `ha_token`,
-  `poll_interval`); `run.sh` wires Supervisor token/url + options.
+  `poll_interval`); `run.sh` wires Supervisor token/url + options. `image`
+  points at the prebuilt GHCR image `ghcr.io/mrjelly17/alsager-{arch}`
+  (built by the Actions worker, not locally on HA).
+- `.github/workflows/build.yml` — on push to `main` (and on release) builds
+  the add-on image per-arch (amd64/armv7/arm64 via QEMU + Buildx) and pushes
+  to **GHCR** (`ghcr.io/mrjelly17/alsager-<arch>:dev` / `:<version>`). HA
+  pulls the prebuilt image; no local Docker build required.
 - Shared singletons `monitored_store` and `ingestion_daemon.daemon` so the
   entities API and ingestion daemon reference the SAME monitored set.
 
