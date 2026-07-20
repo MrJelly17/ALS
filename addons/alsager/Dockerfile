@@ -5,6 +5,7 @@
 # s6-overlay and bashio (required by run.sh: #!/usr/bin/with-contenv bashio).
 # The {arch} placeholder is substituted by the Supervisor at build time when
 # building locally; in CI we pin an explicit arch base per matrix job.
+
 ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest
 FROM ${BUILD_FROM}
 
@@ -14,11 +15,14 @@ ENV PYTHONUNBUFFERED=1 \
     LANG=C.UTF-8 \
     PYTHONIOENCODING=UTF-8
 
+# HA base is Alpine-based and ships without Python. Install python3 + pip.
+RUN apk add --no-cache python3 py3-pip py3-virtualenv
+
 WORKDIR /app
 
 # Install Python dependencies
 COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Copy add-on source
 COPY . /app
