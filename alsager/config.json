@@ -4,7 +4,7 @@
   "slug": "alsager",
   "description": "AI-powered pattern detection for Home Assistant — ingest sensor history, train small neural networks locally, feed patterns back to automations.",
   "url": "https://github.com/MrJelly17/ALS",
-  "arch": ["amd64", "armv7", "arm64"],
+  "arch": ["amd64", "armv7", "aarch64"],
   "startup": "services",
   "boot": "auto",
   "init": false,
