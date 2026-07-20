@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Alsager</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1><span class="logo">Alsager</span> <small>AI pattern detection for Home Assistant</small></h1>
+    <span id="conn" class="badge badge-unknown">HA: unknown</span>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="status">Status</button>
+    <button class="tab" data-tab="entities">Entities</button>
+    <button class="tab" data-tab="data">Data preview</button>
+  </nav>
+
+  <main class="container">
+    <!-- STATUS -->
+    <section class="card tab-panel" data-panel="status">
+      <h2>Status</h2>
+      <table class="status-table">
+        <tbody>
+          <tr><td>Version</td><td id="version">—</td></tr>
+          <tr><td>HA connected</td><td id="ha-connected">—</td></tr>
+          <tr><td>Monitored entities</td><td id="entities">—</td></tr>
+          <tr><td>Ingestion</td><td id="ingestion">—</td></tr>
+          <tr><td>Rows (total)</td><td id="rows-total">—</td></tr>
+          <tr><td>Rows (today)</td><td id="rows-today">—</td></tr>
+          <tr><td>Last error</td><td id="last-error">—</td></tr>
+        </tbody>
+      </table>
+      <div class="toolbar">
+        <button id="start-ingestion" class="btn btn-primary">Start ingestion</button>
+        <button id="stop-ingestion" class="btn">Stop ingestion</button>
+        <button id="refresh-status" class="btn">Refresh</button>
+      </div>
+    </section>
+
+    <!-- ENTITIES -->
+    <section class="card tab-panel hidden" data-panel="entities">
+      <h2>Entities</h2>
+      <div class="toolbar">
+        <input id="entity-filter" type="text" placeholder="Filter by name or domain…" />
+        <select id="domain-filter">
+          <option value="">All domains</option>
+          <option value="sensor">sensor</option>
+          <option value="binary_sensor">binary_sensor</option>
+          <option value="device_tracker">device_tracker</option>
+        </select>
+        <button id="load-entities" class="btn">Load</button>
+        <button id="start-monitoring" class="btn btn-primary">Start monitoring</button>
+        <button id="stop-monitoring" class="btn">Stop monitoring</button>
+      </div>
+      <p id="entity-source" class="muted"></p>
+      <table class="entity-table">
+        <thead>
+          <tr><th></th><th>Entity</th><th>Domain</th><th>State</th></tr>
+        </thead>
+        <tbody id="entity-rows"></tbody>
+      </table>
+      <p id="monitored-summary" class="muted"></p>
+    </section>
+
+    <!-- DATA PREVIEW -->
+    <section class="card tab-panel hidden" data-panel="data">
+      <h2>Data preview</h2>
+      <div class="toolbar">
+        <button id="refresh-data" class="btn">Refresh</button>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr><th>id</th><th>entity_id</th><th>state</th><th>domain</th><th>received_at</th></tr>
+        </thead>
+        <tbody id="data-rows"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

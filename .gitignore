@@ -1,0 +1,12 @@
+# Alsager repo root .gitignore
+.DS_Store
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+*.db
+data/
+config/
+hermes-verify*.py

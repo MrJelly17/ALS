@@ -1,0 +1,29 @@
+{
+  "name": "Alsager",
+  "version": "0.3.0",
+  "slug": "alsager",
+  "description": "AI-powered pattern detection for Home Assistant — ingest sensor history, train small neural networks locally, feed patterns back to automations.",
+  "url": "https://github.com/MrJelly17/ALS",
+  "arch": ["amd64", "armv7", "arm64"],
+  "startup": "services",
+  "boot": "auto",
+  "init": false,
+  "host_network": false,
+  "ingress": true,
+  "ingress_port": 5000,
+  "panel_icon": "mdi:brain",
+  "panel_title": "Alsager",
+  "image": "ghcr.io/mrjelly17/alsager-{arch}",
+  "options": {
+    "ha_base_url": "",
+    "ha_token": "",
+    "poll_interval": 5
+  },
+  "schema": {
+    "ha_base_url": "url",
+    "ha_token": "password",
+    "poll_interval": "int(1,60)"
+  },
+  "map": ["config:rw", "data:rw"],
+  "devices": []
+}

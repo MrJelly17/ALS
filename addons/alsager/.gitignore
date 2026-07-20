@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Local data/config produced at runtime (dev fallback dirs)
+data/
+config/
+*.write_test
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/

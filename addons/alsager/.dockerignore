@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Local data/config produced at runtime (dev fallback dirs)
+data/
+config/
+*.db
+*.write_test
+
+# Tests + dev deps not needed in the image
+tests/
+requirements-dev.txt
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+.git/
+.gitignore
+
+# Local helper scripts
+hermes-verify*.py
