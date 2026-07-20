@@ -43,6 +43,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          # Publish packages as PUBLIC so Home Assistant can pull them
+          # without GHCR credentials (HA only has the image reference).
+          make-public: true
 
       - name: Derive image tags
         id: tags
@@ -52,7 +55,9 @@ jobs:
           if [ "${{ github.event_name }}" = "release" ]; then
             VERSION="${GITHUB_REF_NAME}"
           else
-            VERSION="dev"
+            # Use the add-on version from config.json so HA (which pulls
+            # ghcr.io/.../alsager-{arch}:<config.version>) finds the image.
+            VERSION=$(grep -m1 '"version"' alsager/config.json | sed -E 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')
           fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
@@ -66,6 +71,7 @@ jobs:
           tags: |
             ${{ steps.tags.outputs.image }}:${{ steps.tags.outputs.version }}
             ${{ steps.tags.outputs.image }}:latest
+            ${{ steps.tags.outputs.image }}:dev
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
