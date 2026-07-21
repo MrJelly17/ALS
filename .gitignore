@@ -12,8 +12,6 @@ env/
 data/
 config/
 hermes-verify*.py
-uvicorn.log
-*.log
 
 # --- Local-only project documentation / worklog (NOT pushed to GitHub) ---
 TASK.md
